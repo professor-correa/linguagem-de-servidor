@@ -1,11 +1,12 @@
 import { authRoutes } from './auth-routes.js';
 import { raffleRoutes } from './raffle-routes.js';
+import { ticketRoutes } from './ticket-routes.js';
 import * as sessionModel from '../models/session-model.js';
 import { sendError } from '../utils/http.js';
 import { handleError } from '../utils/handle-error.js';
 import { hashToken, readBearerToken } from '../utils/token.js';
 
-const routes = [...authRoutes, ...raffleRoutes];
+const routes = [...authRoutes, ...raffleRoutes, ...ticketRoutes];
 
 function matchPath(pattern, path) {
   const patternParts = pattern.split('/').filter(Boolean);
