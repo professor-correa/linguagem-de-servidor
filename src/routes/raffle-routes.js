@@ -6,4 +6,5 @@ export const raffleRoutes = [
   { method: 'POST', path: '/api/raffles', handler: raffleController.create, access: 'admin' },
   { method: 'PUT', path: '/api/raffles/:id', handler: raffleController.update, access: 'admin' },
   { method: 'DELETE', path: '/api/raffles/:id', handler: raffleController.remove, access: 'admin' },
+  { method: 'POST', path: '/api/raffles/:id/draw', handler: raffleController.draw, access: 'admin' },
 ];

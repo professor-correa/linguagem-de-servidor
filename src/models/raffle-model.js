@@ -94,3 +94,14 @@ export async function remove(id) {
   const [result] = await pool.query('DELETE FROM raffles WHERE id = ?', [id]);
   return result.affectedRows > 0;
 }
+
+// O "status <> 'drawn'" garante que dois sorteios disparados ao mesmo tempo
+// não escolham dois ganhadores: só o primeiro UPDATE encontra a linha.
+export async function markAsDrawn(id, winnerTicketId) {
+  const [result] = await pool.query(
+    "UPDATE raffles SET status = 'drawn', winner_ticket_id = ? WHERE id = ? AND status <> 'drawn'",
+    [winnerTicketId, id]
+  );
+
+  return result.affectedRows > 0;
+}
