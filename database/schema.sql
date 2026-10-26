@@ -1,3 +1,5 @@
+SET NAMES utf8mb4;
+
 DROP DATABASE IF EXISTS raffle_platform;
 CREATE DATABASE raffle_platform CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 USE raffle_platform;

@@ -1,3 +1,5 @@
+SET NAMES utf8mb4;
+
 USE raffle_platform;
 
 -- Senhas: admin-rifa, maria-rifa e joao-rifa
