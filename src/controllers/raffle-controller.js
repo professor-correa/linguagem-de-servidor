@@ -1,3 +1,4 @@
+import { randomInt } from 'node:crypto';
 import * as raffleModel from '../models/raffle-model.js';
 import * as ticketModel from '../models/ticket-model.js';
 import { validateRaffle } from '../validators/raffle-validator.js';
@@ -35,8 +36,9 @@ export async function show({ response, params }) {
   }
 
   const takenNumbers = await ticketModel.findTakenNumbers(id);
+  const winner = raffle.winnerTicketId ? await ticketModel.findWinner(raffle.winnerTicketId) : null;
 
-  return sendJson(response, 200, { ...raffle, takenNumbers });
+  return sendJson(response, 200, { ...raffle, takenNumbers, winner });
 }
 
 export async function create({ request, response }) {
@@ -121,4 +123,38 @@ export async function remove({ response, params }) {
 
     throw error;
   }
+}
+
+export async function draw({ response, params }) {
+  const id = parseId(params.id);
+
+  if (!id) {
+    return sendError(response, 400, 'Id must be a positive integer');
+  }
+
+  const raffle = await raffleModel.findById(id);
+
+  if (!raffle) {
+    return sendError(response, 404, 'Raffle not found');
+  }
+
+  if (raffle.status === 'drawn') {
+    return sendError(response, 409, 'Raffle has already been drawn');
+  }
+
+  const paidTicketIds = await ticketModel.findPaidIds(id);
+
+  if (paidTicketIds.length === 0) {
+    return sendError(response, 409, 'There are no paid tickets to draw');
+  }
+
+  const winnerTicketId = paidTicketIds[randomInt(paidTicketIds.length)];
+  const drawn = await raffleModel.markAsDrawn(id, winnerTicketId);
+
+  if (!drawn) {
+    return sendError(response, 409, 'Raffle has already been drawn');
+  }
+
+  const winner = await ticketModel.findWinner(winnerTicketId);
+  return sendJson(response, 200, { raffleId: id, winner });
 }
