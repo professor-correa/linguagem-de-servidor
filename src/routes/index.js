@@ -1,7 +1,8 @@
+import { raffleRoutes } from './raffle-routes.js';
 import { sendError } from '../utils/http.js';
 import { handleError } from '../utils/handle-error.js';
 
-const routes = [];
+const routes = [...raffleRoutes];
 
 function matchPath(pattern, path) {
   const patternParts = pattern.split('/').filter(Boolean);
