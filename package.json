@@ -1,0 +1,23 @@
+{
+  "name": "linguagem-de-servidor",
+  "version": "1.0.0",
+  "description": "API de rifas online feita com o módulo http nativo do Node.js e MySQL",
+  "type": "module",
+  "main": "src/server.js",
+  "scripts": {
+    "start": "node src/server.js",
+    "dev": "nodemon src/server.js"
+  },
+  "dependencies": {
+    "bcrypt": "^6.0.0",
+    "dotenv": "^18.0.9",
+    "mysql2": "^3.24.6"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.14"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "license": "MIT"
+}
