@@ -1,8 +1,11 @@
+import { authRoutes } from './auth-routes.js';
 import { raffleRoutes } from './raffle-routes.js';
+import * as sessionModel from '../models/session-model.js';
 import { sendError } from '../utils/http.js';
 import { handleError } from '../utils/handle-error.js';
+import { hashToken, readBearerToken } from '../utils/token.js';
 
-const routes = [...raffleRoutes];
+const routes = [...authRoutes, ...raffleRoutes];
 
 function matchPath(pattern, path) {
   const patternParts = pattern.split('/').filter(Boolean);
@@ -28,6 +31,11 @@ function matchPath(pattern, path) {
   return params;
 }
 
+async function findCurrentUser(request) {
+  const token = readBearerToken(request);
+  return token ? sessionModel.findUserByTokenHash(hashToken(token)) : null;
+}
+
 export async function router(request, response) {
   const url = new URL(request.url, `http://${request.headers.host}`);
   const allowedMethods = [];
@@ -45,7 +53,17 @@ export async function router(request, response) {
         continue;
       }
 
-      return await route.handler({ request, response, params, query: url.searchParams });
+      const user = route.access ? await findCurrentUser(request) : null;
+
+      if (route.access && !user) {
+        return sendError(response, 401, 'Authentication required');
+      }
+
+      if (route.access === 'admin' && user.role !== 'admin') {
+        return sendError(response, 403, 'Only admins can do this');
+      }
+
+      return await route.handler({ request, response, params, query: url.searchParams, user });
     }
 
     if (allowedMethods.length > 0) {
