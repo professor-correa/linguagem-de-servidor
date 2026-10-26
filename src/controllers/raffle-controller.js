@@ -1,4 +1,5 @@
 import * as raffleModel from '../models/raffle-model.js';
+import * as ticketModel from '../models/ticket-model.js';
 import { validateRaffle } from '../validators/raffle-validator.js';
 import { readJsonBody, sendError, sendJson, sendNoContent } from '../utils/http.js';
 import { parseId } from '../utils/parse-id.js';
@@ -33,7 +34,9 @@ export async function show({ response, params }) {
     return sendError(response, 404, 'Raffle not found');
   }
 
-  return sendJson(response, 200, raffle);
+  const takenNumbers = await ticketModel.findTakenNumbers(id);
+
+  return sendJson(response, 200, { ...raffle, takenNumbers });
 }
 
 export async function create({ request, response }) {
@@ -82,6 +85,12 @@ export async function update({ request, response, params }) {
 
   if (current.status === 'drawn') {
     return sendError(response, 409, 'A drawn raffle cannot be changed');
+  }
+
+  const highestNumber = await ticketModel.findHighestNumber(id);
+
+  if (value.totalTickets < highestNumber) {
+    return sendError(response, 409, `Total tickets cannot be lower than ${highestNumber}, a number already taken`);
   }
 
   await raffleModel.update(id, value);
